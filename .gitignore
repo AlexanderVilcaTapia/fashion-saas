@@ -1,0 +1,70 @@
+# ===========================
+# DJANGO
+# ===========================
+backend-django/__pycache__/
+backend-django/**/__pycache__/
+backend-django/**/*.pyc
+backend-django/**/*.pyo
+backend-django/*.log
+backend-django/db.sqlite3
+backend-django/.env
+backend-django/venv/
+backend-django/env/
+backend-django/staticfiles/
+backend-django/media/
+
+# ===========================
+# SPRING BOOT
+# ===========================
+backend-spring/target/
+backend-spring/.mvn/
+backend-spring/**/*.class
+backend-spring/.env
+backend-spring/**.jar
+backend-spring/.gradle/
+backend-spring/build/
+
+# ===========================
+# REACT
+# ===========================
+frontend-react/node_modules/
+frontend-react/dist/
+frontend-react/build/
+frontend-react/.env
+frontend-react/.env.local
+frontend-react/.env.production
+frontend-react/coverage/
+
+# ===========================
+# ANDROID
+# ===========================
+mobile-android/.gradle/
+mobile-android/build/
+mobile-android/app/build/
+mobile-android/local.properties
+mobile-android/**/*.keystore
+mobile-android/**/*.jks
+mobile-android/google-services.json
+
+# ===========================
+# IDEs
+# ===========================
+.idea/
+*.iml
+.vscode/
+*.suo
+*.user
+
+# ===========================
+# SISTEMA OPERATIVO
+# ===========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===========================
+# VARIABLES DE ENTORNO (NUNCA AL REPO)
+# ===========================
+.env
+.env.*
+!.env.example
