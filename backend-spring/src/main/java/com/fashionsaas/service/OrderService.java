@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,7 @@ public class OrderService {
     @Value("${app.django.api.url}")
     private String djangoApiUrl;
 
-    /**
+        /**
      * Obtiene la lista de órdenes de la tienda autenticada.
      * Permite filtrar por estado de orden y estado de pago.
      *
@@ -40,14 +39,13 @@ public class OrderService {
      * @return lista de órdenes de la tienda
      */
     public List<OrderResponse> getStoreOrders(String email, String status, String paymentStatus) {
-        UriComponentsBuilder urlBuilder = UriComponentsBuilder
-                .fromHttpUrl(djangoApiUrl + "/orders/my-store/");
+        StringBuilder url = new StringBuilder(djangoApiUrl + "/orders/my-store/?format=json");
 
-        if (status != null) urlBuilder.queryParam("status", status);
-        if (paymentStatus != null) urlBuilder.queryParam("payment_status", paymentStatus);
+        if (status != null) url.append("&status=").append(status);
+        if (paymentStatus != null) url.append("&payment_status=").append(paymentStatus);
 
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                urlBuilder.toUriString(),
+                url.toString(),
                 HttpMethod.GET,
                 buildAuthRequest(email, null),
                 new ParameterizedTypeReference<Map<String, Object>>() {}
