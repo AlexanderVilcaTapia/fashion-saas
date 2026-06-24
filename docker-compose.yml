@@ -1,0 +1,73 @@
+version: '3.9'
+
+services:
+
+  # Base de datos PostgreSQL
+  db:
+    image: postgres:16
+    container_name: fashion_db
+    environment:
+      POSTGRES_DB: fashion_saas
+      POSTGRES_USER: fashion_user
+      POSTGRES_PASSWORD: fashion_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - fashion_network
+
+  # API principal Django
+  django:
+    build:
+      context: ./backend-django
+      dockerfile: Dockerfile
+    container_name: fashion_django
+    environment:
+      - SECRET_KEY=django-insecure-fashion-saas-dev-key
+      - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+      - DATABASE_URL=postgresql://fashion_user:fashion_password@db:5432/fashion_saas
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - fashion_network
+    volumes:
+      - ./backend-django:/app
+
+  # Panel admin Spring Boot
+  spring:
+    build:
+      context: ./backend-spring
+      dockerfile: Dockerfile
+    container_name: fashion_spring
+    environment:
+      - DJANGO_API_URL=http://django:8000/api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - django
+    networks:
+      - fashion_network
+
+  # Web React
+  react:
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile
+    container_name: fashion_react
+    ports:
+      - "5173:5173"
+    depends_on:
+      - django
+    networks:
+      - fashion_network
+
+volumes:
+  postgres_data:
+
+networks:
+  fashion_network:
+    driver: bridge
