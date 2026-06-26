@@ -70,18 +70,12 @@ Los compradores acceden a la plataforma desde React (web) o la app Android. Las 
 
 
 
-\## Deploy
-
-
+## Deploy
 
 | Servicio | URL |
-
 |----------|-----|
-
-| API Django | Predicament |
-
-| Panel Spring | Próximamente |
-
+| API Django | https://fashion-saas-production.up.railway.app |
+| Panel Spring Boot | https://fashion-saas-admin.onrender.com |
 | Web React | Próximamente |
 
 
@@ -94,7 +88,6 @@ Los compradores acceden a la plataforma desde React (web) o la app Android. Las 
 
 \- Camila Fuentes Zuniga
 
-\- Adrian Flores Camma
 
 
 
