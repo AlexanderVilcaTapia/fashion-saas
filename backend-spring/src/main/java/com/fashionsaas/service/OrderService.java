@@ -29,41 +29,9 @@ public class OrderService {
     @Value("${app.django.api.url}")
     private String djangoApiUrl;
 
-        /**
-     * Obtiene la lista de órdenes de la tienda autenticada.
-     * Permite filtrar por estado de orden y estado de pago.
-     *
-     * @param email         correo del dueño de tienda autenticado
-     * @param status        filtro opcional por estado de orden
-     * @param paymentStatus filtro opcional por estado de pago
-     * @return lista de órdenes de la tienda
-     */
-    public List<OrderResponse> getStoreOrders(String email, String status, String paymentStatus) {
-        StringBuilder url = new StringBuilder(djangoApiUrl + "/orders/my-store/?format=json");
-
-        if (status != null) url.append("&status=").append(status);
-        if (paymentStatus != null) url.append("&payment_status=").append(paymentStatus);
-
-        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                url.toString(),
-                HttpMethod.GET,
-                buildAuthRequest(email, null),
-                new ParameterizedTypeReference<Map<String, Object>>() {}
-        );
-
-        Map<String, Object> body = response.getBody();
-        if (body == null) return List.of();
-
-        List<Map<String, Object>> results = (List<Map<String, Object>>) body.get("results");
-        if (results == null) return List.of();
-
-        return results.stream()
-                .map(this::mapToOrderResponse)
-                .collect(Collectors.toList());
-    }
-
     /**
      * Obtiene la lista de órdenes de la tienda autenticada.
+     * Permite filtrar por estado de orden y estado de pago.
      *
      * @param djangoToken   token de acceso de Django
      * @param status        filtro opcional por estado de orden
