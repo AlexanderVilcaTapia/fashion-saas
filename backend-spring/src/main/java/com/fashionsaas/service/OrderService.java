@@ -63,59 +63,81 @@ public class OrderService {
     }
 
     /**
-     * Obtiene el detalle de una orden específica de la tienda autenticada.
+     * Obtiene la lista de órdenes de la tienda autenticada.
      *
-     * @param email   correo del dueño de tienda autenticado
-     * @param orderId identificador de la orden
-     * @return detalle de la orden
+     * @param djangoToken   token de acceso de Django
+     * @param status        filtro opcional por estado de orden
+     * @param paymentStatus filtro opcional por estado de pago
+     * @return lista de órdenes de la tienda
      */
-    public OrderResponse getOrderDetail(String email, Long orderId) {
-        String url = djangoApiUrl + "/orders/my-store/" + orderId + "/";
+    public List<OrderResponse> getStoreOrders(String djangoToken, String status, String paymentStatus) {
+        StringBuilder url = new StringBuilder(djangoApiUrl + "/orders/my-store/?format=json");
+        if (status != null) url.append("&status=").append(status);
+        if (paymentStatus != null) url.append("&payment_status=").append(paymentStatus);
 
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                url,
+                url.toString(),
                 HttpMethod.GET,
-                buildAuthRequest(email, null),
+                buildAuthRequest(djangoToken, null),
                 new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
+        Map<String, Object> body = response.getBody();
+        if (body == null) return List.of();
+        List<Map<String, Object>> results = (List<Map<String, Object>>) body.get("results");
+        if (results == null) return List.of();
+        return results.stream().map(this::mapToOrderResponse).collect(Collectors.toList());
+    }
+
+    /**
+     * Obtiene el detalle de una orden específica de la tienda autenticada.
+     *
+     * @param djangoToken token de acceso de Django
+     * @param orderId     identificador de la orden
+     * @return detalle de la orden
+     */
+    public OrderResponse getOrderDetail(String djangoToken, Long orderId) {
+        String url = djangoApiUrl + "/orders/my-store/" + orderId + "/";
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                buildAuthRequest(djangoToken, null),
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+        );
         return mapToOrderResponse(response.getBody());
     }
 
     /**
      * Actualiza el estado de una orden específica de la tienda autenticada.
      *
-     * @param email     correo del dueño de tienda autenticado
-     * @param orderId   identificador de la orden
-     * @param newStatus nuevo estado de la orden
+     * @param djangoToken token de acceso de Django
+     * @param orderId     identificador de la orden
+     * @param newStatus   nuevo estado de la orden
      * @return orden con el estado actualizado
      */
-    public OrderResponse updateOrderStatus(String email, Long orderId, String newStatus) {
+    public OrderResponse updateOrderStatus(String djangoToken, Long orderId, String newStatus) {
         String url = djangoApiUrl + "/orders/my-store/" + orderId + "/";
-
         Map<String, String> body = Map.of("status", newStatus);
-
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 url,
                 HttpMethod.PATCH,
-                buildAuthRequest(email, body),
+                buildAuthRequest(djangoToken, body),
                 new ParameterizedTypeReference<Map<String, Object>>() {}
         );
-
         return mapToOrderResponse(response.getBody());
     }
 
     /**
-     * Construye una petición HTTP con el email del usuario
-     * en los headers para identificarlo en Django.
+     * Construye una petición HTTP con el token de Django
+     * en el header Authorization.
      *
-     * @param email correo del usuario autenticado
-     * @param body  cuerpo de la petición, puede ser nulo
+     * @param djangoToken token de acceso de Django
+     * @param body        cuerpo de la petición, puede ser nulo
      * @return entidad HTTP con headers y body configurados
      */
-    private HttpEntity<Object> buildAuthRequest(String email, Object body) {
+    private HttpEntity<Object> buildAuthRequest(String djangoToken, Object body) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-User-Email", email);
+        headers.set("Authorization", "Bearer " + djangoToken);
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(body, headers);
     }

@@ -7,48 +7,36 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.Map;
 
 /**
- * Servicio que carga los detalles del usuario desde la API de Django.
- * Spring Security lo usa para autenticar al dueño de tienda.
+ * Servicio que carga los detalles del usuario desde el email extraído del JWT.
+ * Spring Security lo usa para autenticar al dueño de tienda en cada petición.
+ * No consulta Django en cada request — el JWT ya fue validado previamente.
  */
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final RestTemplate restTemplate;
-
     /**
-     * Carga el usuario desde la API de Django usando su email.
-     * Si no existe, lanza UsernameNotFoundException.
+     * Carga el usuario usando el email extraído del JWT.
+     * Asigna el rol STORE_OWNER por defecto ya que solo
+     * store_owners y admins pueden obtener un JWT de este panel.
      *
-     * @param email correo del usuario a buscar
-     * @return UserDetails con la información del usuario
+     * @param email correo del usuario extraído del JWT
+     * @return UserDetails con el email y rol del usuario
      */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        try {
-            String url = "http://localhost:8000/api/auth/me/";
-            Map<String, Object> userMap = restTemplate.getForObject(url, Map.class);
-
-            if (userMap == null) {
-                throw new UsernameNotFoundException("Usuario no encontrado: " + email);
-            }
-
-            String role = (String) userMap.get("role");
-            String userEmail = (String) userMap.get("email");
-
-            return new User(
-                    userEmail,
-                    "",
-                    List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
-            );
-        } catch (Exception e) {
-            throw new UsernameNotFoundException("Usuario no encontrado: " + email);
+        if (email == null || email.isEmpty()) {
+            throw new UsernameNotFoundException("Email no proporcionado.");
         }
+
+        return new User(
+                email,
+                "",
+                List.of(new SimpleGrantedAuthority("ROLE_STORE_OWNER"))
+        );
     }
 }

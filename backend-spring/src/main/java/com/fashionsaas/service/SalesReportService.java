@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 
 /**
  * Servicio para la generación de reportes de ventas.
- * Consulta la API de Django y procesa los datos para generar
- * reportes por rango de fechas.
+ * Consulta la API de Django usando el token de Django
+ * para generar reportes por rango de fechas.
  */
 @Service
 @RequiredArgsConstructor
@@ -33,12 +33,12 @@ public class SalesReportService {
      * Genera un reporte de ventas para la tienda autenticada
      * en el rango de fechas indicado.
      *
-     * @param email     correo del dueño de tienda autenticado
-     * @param startDate fecha de inicio en formato YYYY-MM-DD
-     * @param endDate   fecha de fin en formato YYYY-MM-DD
+     * @param djangoToken token de acceso de Django
+     * @param startDate   fecha de inicio en formato YYYY-MM-DD
+     * @param endDate     fecha de fin en formato YYYY-MM-DD
      * @return mapa con el reporte de ventas del período
      */
-    public Map<String, Object> getSalesReport(String email, String startDate, String endDate) {
+    public Map<String, Object> getSalesReport(String djangoToken, String startDate, String endDate) {
         String url = djangoApiUrl + "/orders/my-store/?payment_status=paid"
                 + "&created_after=" + startDate
                 + "&created_before=" + endDate;
@@ -46,7 +46,7 @@ public class SalesReportService {
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
-                buildAuthRequest(email),
+                buildAuthRequest(djangoToken),
                 new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
@@ -75,7 +75,6 @@ public class SalesReportService {
         report.put("total_orders", totalOrders);
         report.put("average_order_value", totalOrders > 0 ? totalRevenue / totalOrders : 0);
         report.put("revenue_by_day", revenueByDay);
-
         return report;
     }
 
@@ -98,15 +97,15 @@ public class SalesReportService {
     }
 
     /**
-     * Construye una petición HTTP con el email del usuario
-     * en los headers para identificarlo en Django.
+     * Construye una petición HTTP con el token de Django
+     * en el header Authorization.
      *
-     * @param email correo del usuario autenticado
+     * @param djangoToken token de acceso de Django
      * @return entidad HTTP con headers configurados
      */
-    private HttpEntity<Void> buildAuthRequest(String email) {
+    private HttpEntity<Void> buildAuthRequest(String djangoToken) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-User-Email", email);
+        headers.set("Authorization", "Bearer " + djangoToken);
         return new HttpEntity<>(headers);
     }
 

@@ -28,20 +28,14 @@ public class InventoryService {
 
     /**
      * Obtiene la lista paginada de productos de la tienda autenticada.
-     * Permite filtrar por estado y categoría.
      *
-     * @param email    correo del dueño de tienda autenticado
-     * @param status   filtro opcional por estado del producto
-     * @param category filtro opcional por categoría
-     * @param page     número de página para paginación
+     * @param djangoToken token de acceso de Django
+     * @param status      filtro opcional por estado del producto
+     * @param category    filtro opcional por categoría
+     * @param page        número de página
      * @return mapa con los productos y datos de paginación
      */
-    public Map<String, Object> getStoreProducts(
-            String email,
-            String status,
-            String category,
-            int page
-    ) {
+    public Map<String, Object> getStoreProducts(String djangoToken, String status, String category, int page) {
         StringBuilder url = new StringBuilder(djangoApiUrl + "/products/my-store/?page=" + page);
         if (status != null) url.append("&status=").append(status);
         if (category != null) url.append("&category=").append(category);
@@ -49,51 +43,46 @@ public class InventoryService {
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 url.toString(),
                 HttpMethod.GET,
-                buildAuthRequest(email),
+                buildAuthRequest(djangoToken),
                 new ParameterizedTypeReference<Map<String, Object>>() {}
         );
-
         return response.getBody() != null ? response.getBody() : new HashMap<>();
     }
 
     /**
-     * Obtiene un resumen del inventario de la tienda:
-     * total de productos, activos, inactivos y sin stock.
+     * Obtiene un resumen del inventario de la tienda.
      *
-     * @param email correo del dueño de tienda autenticado
+     * @param djangoToken token de acceso de Django
      * @return mapa con el resumen del inventario
      */
-    public Map<String, Object> getInventorySummary(String email) {
+    public Map<String, Object> getInventorySummary(String djangoToken) {
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 djangoApiUrl + "/stores/my-store/dashboard/",
                 HttpMethod.GET,
-                buildAuthRequest(email),
+                buildAuthRequest(djangoToken),
                 new ParameterizedTypeReference<Map<String, Object>>() {}
         );
-
         Map<String, Object> dashboardData = response.getBody();
         Map<String, Object> summary = new HashMap<>();
-
         if (dashboardData != null) {
             summary.put("total_products", dashboardData.get("total_products"));
             summary.put("active_products", dashboardData.get("total_products"));
             summary.put("inactive_products", 0);
             summary.put("out_of_stock", 0);
         }
-
         return summary;
     }
 
     /**
-     * Construye una petición HTTP con el email del usuario
-     * en los headers para identificarlo en Django.
+     * Construye una petición HTTP con el token de Django
+     * en el header Authorization.
      *
-     * @param email correo del usuario autenticado
+     * @param djangoToken token de acceso de Django
      * @return entidad HTTP con headers configurados
      */
-    private HttpEntity<Void> buildAuthRequest(String email) {
+    private HttpEntity<Void> buildAuthRequest(String djangoToken) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-User-Email", email);
+        headers.set("Authorization", "Bearer " + djangoToken);
         return new HttpEntity<>(headers);
     }
 }

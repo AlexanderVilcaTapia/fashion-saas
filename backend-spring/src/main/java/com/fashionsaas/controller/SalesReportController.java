@@ -1,5 +1,6 @@
 package com.fashionsaas.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import com.fashionsaas.service.SalesReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -30,25 +31,21 @@ public class SalesReportController {
 
     /**
      * Retorna el reporte de ventas de la tienda en un rango de fechas.
-     * Incluye total de ingresos, órdenes y productos más vendidos.
      *
-     * @param userDetails usuario autenticado extraído del JWT
-     * @param startDate   fecha de inicio en formato YYYY-MM-DD
-     * @param endDate     fecha de fin en formato YYYY-MM-DD
+     * @param request   petición HTTP con el Django token como atributo
+     * @param startDate fecha de inicio en formato YYYY-MM-DD
+     * @param endDate   fecha de fin en formato YYYY-MM-DD
      * @return reporte de ventas del período indicado
      */
     @GetMapping("/sales")
     @Operation(summary = "Reporte de ventas", description = "Retorna ventas e ingresos en un rango de fechas")
     public ResponseEntity<Map<String, Object>> getSalesReport(
-            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest request,
             @RequestParam String startDate,
             @RequestParam String endDate
     ) {
-        Map<String, Object> report = salesReportService.getSalesReport(
-                userDetails.getUsername(),
-                startDate,
-                endDate
-        );
+        String djangoToken = (String) request.getAttribute("django_token");
+        Map<String, Object> report = salesReportService.getSalesReport(djangoToken, startDate, endDate);
         return ResponseEntity.ok(report);
     }
 }

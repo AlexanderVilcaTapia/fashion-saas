@@ -6,11 +6,10 @@ import com.fashionsaas.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +22,7 @@ import java.util.List;
 
 /**
  * Controlador para la gestión de órdenes desde el panel admin.
- * Permite al dueño de tienda ver y actualizar el estado de sus órdenes.
+ * Usa el Django token almacenado en el request para autenticar en Django.
  */
 @RestController
 @RequestMapping("/api/orders")
@@ -36,9 +35,8 @@ public class OrderController {
 
     /**
      * Retorna la lista de órdenes de la tienda autenticada.
-     * Se puede filtrar por estado de orden o estado de pago.
      *
-     * @param userDetails   usuario autenticado extraído del JWT
+     * @param request       petición HTTP con el Django token como atributo
      * @param status        filtro opcional por estado de orden
      * @param paymentStatus filtro opcional por estado de pago
      * @return lista de órdenes de la tienda
@@ -46,55 +44,50 @@ public class OrderController {
     @GetMapping
     @Operation(summary = "Listar órdenes", description = "Retorna todas las órdenes de la tienda con filtros opcionales")
     public ResponseEntity<List<OrderResponse>> getOrders(
-            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest request,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String paymentStatus
     ) {
-        List<OrderResponse> orders = orderService.getStoreOrders(
-                userDetails.getUsername(),
-                status,
-                paymentStatus
-        );
+        String djangoToken = (String) request.getAttribute("django_token");
+        List<OrderResponse> orders = orderService.getStoreOrders(djangoToken, status, paymentStatus);
         return ResponseEntity.ok(orders);
     }
 
     /**
-     * Retorna el detalle de una orden específica de la tienda autenticada.
+     * Retorna el detalle de una orden específica.
      *
-     * @param userDetails usuario autenticado extraído del JWT
-     * @param orderId     identificador de la orden
+     * @param request petición HTTP con el Django token como atributo
+     * @param orderId identificador de la orden
      * @return detalle de la orden
      */
     @GetMapping("/{orderId}")
     @Operation(summary = "Detalle de orden", description = "Retorna el detalle de una orden específica")
     public ResponseEntity<OrderResponse> getOrderDetail(
-            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest request,
             @PathVariable Long orderId
     ) {
-        OrderResponse order = orderService.getOrderDetail(userDetails.getUsername(), orderId);
+        String djangoToken = (String) request.getAttribute("django_token");
+        OrderResponse order = orderService.getOrderDetail(djangoToken, orderId);
         return ResponseEntity.ok(order);
     }
 
     /**
-     * Actualiza el estado de una orden de la tienda autenticada.
+     * Actualiza el estado de una orden específica.
      *
-     * @param userDetails usuario autenticado extraído del JWT
-     * @param orderId     identificador de la orden
-     * @param request     nuevo estado de la orden
+     * @param request       petición HTTP con el Django token como atributo
+     * @param orderId       identificador de la orden
+     * @param statusRequest nuevo estado de la orden
      * @return orden con el estado actualizado
      */
     @PatchMapping("/{orderId}/status")
     @Operation(summary = "Actualizar estado", description = "Actualiza el estado de una orden")
     public ResponseEntity<OrderResponse> updateOrderStatus(
-            @AuthenticationPrincipal UserDetails userDetails,
+            HttpServletRequest request,
             @PathVariable Long orderId,
-            @Valid @RequestBody UpdateOrderStatusRequest request
+            @Valid @RequestBody UpdateOrderStatusRequest statusRequest
     ) {
-        OrderResponse order = orderService.updateOrderStatus(
-                userDetails.getUsername(),
-                orderId,
-                request.getStatus()
-        );
+        String djangoToken = (String) request.getAttribute("django_token");
+        OrderResponse order = orderService.updateOrderStatus(djangoToken, orderId, statusRequest.getStatus());
         return ResponseEntity.ok(order);
     }
 }

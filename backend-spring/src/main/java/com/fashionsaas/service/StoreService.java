@@ -29,36 +29,31 @@ public class StoreService {
     private String djangoApiUrl;
 
     /**
-     * Obtiene el perfil de la tienda del dueño autenticado
-     * desde la API de Django.
+     * Obtiene el perfil de la tienda del dueño autenticado.
      *
-     * @param email correo del dueño de tienda autenticado
+     * @param djangoToken token de acceso de Django
      * @return datos del perfil de la tienda
      */
-    public StoreResponse getStoreProfile(String email) {
+    public StoreResponse getStoreProfile(String djangoToken) {
         String url = djangoApiUrl + "/stores/my-store/";
-
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
-                buildAuthRequest(email, null),
+                buildAuthRequest(djangoToken, null),
                 new ParameterizedTypeReference<Map<String, Object>>() {}
         );
-
         return mapToStoreResponse(response.getBody());
     }
 
     /**
-     * Actualiza el perfil de la tienda del dueño autenticado
-     * enviando los datos a la API de Django.
+     * Actualiza el perfil de la tienda del dueño autenticado.
      *
-     * @param email   correo del dueño de tienda autenticado
-     * @param request datos a actualizar
+     * @param djangoToken token de acceso de Django
+     * @param request     datos a actualizar
      * @return perfil actualizado de la tienda
      */
-    public StoreResponse updateStoreProfile(String email, UpdateStoreRequest request) {
+    public StoreResponse updateStoreProfile(String djangoToken, UpdateStoreRequest request) {
         String url = djangoApiUrl + "/stores/my-store/";
-
         Map<String, Object> body = Map.of(
                 "name", request.getName(),
                 "description", request.getDescription() != null ? request.getDescription() : "",
@@ -67,28 +62,26 @@ public class StoreService {
                 "phone", request.getPhone() != null ? request.getPhone() : "",
                 "email", request.getEmail() != null ? request.getEmail() : ""
         );
-
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 url,
                 HttpMethod.PATCH,
-                buildAuthRequest(email, body),
+                buildAuthRequest(djangoToken, body),
                 new ParameterizedTypeReference<Map<String, Object>>() {}
         );
-
         return mapToStoreResponse(response.getBody());
     }
 
     /**
-     * Construye una petición HTTP con el email del usuario
-     * en los headers para identificarlo en Django.
+     * Construye una petición HTTP con el token de Django
+     * en el header Authorization para autenticar en Django.
      *
-     * @param email correo del usuario autenticado
-     * @param body  cuerpo de la petición, puede ser nulo
+     * @param djangoToken token de acceso de Django
+     * @param body        cuerpo de la petición, puede ser nulo
      * @return entidad HTTP con headers y body configurados
      */
-    private HttpEntity<Object> buildAuthRequest(String email, Object body) {
+    private HttpEntity<Object> buildAuthRequest(String djangoToken, Object body) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-User-Email", email);
+        headers.set("Authorization", "Bearer " + djangoToken);
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(body, headers);
     }

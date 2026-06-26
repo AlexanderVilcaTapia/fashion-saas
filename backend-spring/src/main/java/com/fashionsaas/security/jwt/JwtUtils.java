@@ -12,7 +12,8 @@ import java.util.Date;
 
 /**
  * Utilidad para generación y validación de tokens JWT.
- * Se usa para autenticar a los dueños de tienda en el panel admin.
+ * El token incluye el Django access token para usarlo
+ * en llamadas posteriores a la API de Django.
  */
 @Component
 public class JwtUtils {
@@ -24,18 +25,30 @@ public class JwtUtils {
     private long jwtExpiration;
 
     /**
-     * Genera un token JWT para el usuario dado.
+     * Genera un token JWT que incluye el email y el token de Django.
+     *
+     * @param email       correo del usuario autenticado
+     * @param djangoToken token de acceso de Django
+     * @return token JWT firmado
+     */
+    public String generateToken(String email, String djangoToken) {
+        return Jwts.builder()
+                .subject(email)
+                .claim("django_token", djangoToken)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(getSecretKey())
+                .compact();
+    }
+
+    /**
+     * Genera un token JWT solo con el email (sin Django token).
      *
      * @param email correo del usuario autenticado
      * @return token JWT firmado
      */
     public String generateToken(String email) {
-        return Jwts.builder()
-                .subject(email)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(getSecretKey())
-                .compact();
+        return generateToken(email, "");
     }
 
     /**
@@ -46,6 +59,17 @@ public class JwtUtils {
      */
     public String getEmailFromToken(String token) {
         return getClaims(token).getSubject();
+    }
+
+    /**
+     * Extrae el token de Django del token JWT.
+     *
+     * @param token token JWT
+     * @return token de Django o cadena vacía si no existe
+     */
+    public String getDjangoTokenFromToken(String token) {
+        Claims claims = getClaims(token);
+        return claims.get("django_token", String.class);
     }
 
     /**

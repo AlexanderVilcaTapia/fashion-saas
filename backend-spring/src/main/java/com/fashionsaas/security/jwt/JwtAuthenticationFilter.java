@@ -18,7 +18,7 @@ import java.io.IOException;
 
 /**
  * Filtro que intercepta cada petición HTTP para validar el token JWT.
- * Si el token es válido, autentica al usuario en el contexto de seguridad.
+ * Extrae el Django token y lo almacena en el request para uso posterior.
  */
 @Component
 @RequiredArgsConstructor
@@ -28,8 +28,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     /**
-     * Intercepta la petición, extrae el token JWT del header Authorization,
-     * lo valida y autentica al usuario si es correcto.
+     * Intercepta la petición, valida el JWT y almacena el Django token
+     * como atributo del request para que los servicios lo usen.
      *
      * @param request     petición HTTP entrante
      * @param response    respuesta HTTP
@@ -46,6 +46,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(token) && jwtUtils.validateToken(token)) {
             String email = jwtUtils.getEmailFromToken(token);
+            String djangoToken = jwtUtils.getDjangoTokenFromToken(token);
+
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
             UsernamePasswordAuthenticationToken authentication =
@@ -60,6 +62,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Almacena el Django token en el request para uso en servicios
+            if (StringUtils.hasText(djangoToken)) {
+                request.setAttribute("django_token", djangoToken);
+            }
         }
 
         filterChain.doFilter(request, response);

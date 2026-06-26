@@ -15,7 +15,7 @@ import java.util.Map;
 
 /**
  * Servicio que obtiene las estadísticas del dashboard
- * consultando directamente la API de Django.
+ * consultando directamente la API de Django con el token de Django.
  */
 @Service
 @RequiredArgsConstructor
@@ -30,16 +30,16 @@ public class DashboardService {
      * Obtiene las estadísticas generales de la tienda
      * desde el endpoint de Django correspondiente.
      *
-     * @param email correo del dueño de tienda autenticado
+     * @param djangoToken token de acceso de Django
      * @return estadísticas del dashboard de la tienda
      */
-    public DashboardStatsResponse getStoreStats(String email) {
+    public DashboardStatsResponse getStoreStats(String djangoToken) {
         String url = djangoApiUrl + "/orders/my-store/stats/";
 
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
-                buildAuthRequest(email),
+                buildAuthRequest(djangoToken),
                 new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
@@ -63,15 +63,15 @@ public class DashboardService {
     }
 
     /**
-     * Construye una petición HTTP con el email del usuario
-     * en los headers para identificarlo en Django.
+     * Construye una petición HTTP con el token de Django
+     * en el header Authorization.
      *
-     * @param email correo del usuario autenticado
+     * @param djangoToken token de acceso de Django
      * @return entidad HTTP con headers configurados
      */
-    private HttpEntity<Void> buildAuthRequest(String email) {
+    private HttpEntity<Void> buildAuthRequest(String djangoToken) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-User-Email", email);
+        headers.set("Authorization", "Bearer " + djangoToken);
         return new HttpEntity<>(headers);
     }
 

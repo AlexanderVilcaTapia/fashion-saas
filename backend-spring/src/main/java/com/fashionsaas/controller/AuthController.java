@@ -106,7 +106,7 @@ public class AuthController {
             }
 
             // Generar token JWT propio del panel admin
-            String token = jwtUtils.generateToken(email);
+            String token = jwtUtils.generateToken(email, accessToken);
 
             AuthResponse authResponse = AuthResponse.builder()
                     .token(token)
