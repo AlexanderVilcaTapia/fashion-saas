@@ -52,27 +52,26 @@ class AiViewModel @Inject constructor(
     )
 
     init {
-        loadCartAndRecommend()
+        // No auto-genera al entrar, solo carga los productos del carrito
+        loadCartItems()
     }
 
     /**
-     * Carga los items del carrito y genera recomendaciones automáticamente.
-     * Este es el flujo central: la IA se activa con los datos reales del carrito.
+     * Carga los items del carrito sin generar recomendaciones automáticamente.
+     * El usuario decide cuándo generar para no exceder el límite de la API.
      */
-    fun loadCartAndRecommend() {
+    private fun loadCartItems() {
         viewModelScope.launch {
-            _uiState.value = AiUiState(isLoading = true)
             try {
                 val items = cartRepository.getCartItems().first()
-                _uiState.value = _uiState.value.copy(cartItems = items)
-                if (items.isNotEmpty()) {
-                    generateOutfitRecommendation(items)
-                } else {
-                    _uiState.value = AiUiState(
-                        isLoading = false,
-                        recommendation = "Agrega productos a tu carrito para recibir recomendaciones de outfits personalizadas."
-                    )
-                }
+                _uiState.value = AiUiState(
+                    isLoading = false,
+                    cartItems = items,
+                    recommendation = if (items.isEmpty())
+                        "Agrega productos a tu carrito para recibir recomendaciones de outfits personalizadas."
+                    else
+                        ""
+                )
             } catch (e: Exception) {
                 _uiState.value = AiUiState(
                     isLoading = false,
@@ -126,7 +125,13 @@ class AiViewModel @Inject constructor(
      * Regenera las recomendaciones con los datos actuales del carrito.
      */
     fun regenerateRecommendation() {
-        loadCartAndRecommend()
+        viewModelScope.launch {
+            val items = _uiState.value.cartItems
+            if (items.isNotEmpty()) {
+                _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+                generateOutfitRecommendation(items)
+            }
+        }
     }
 
     /**

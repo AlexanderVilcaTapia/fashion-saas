@@ -146,6 +146,23 @@ fun AiRecommendationScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
+            if (uiState.cartItems.isNotEmpty() && uiState.recommendation.isEmpty() && !uiState.isLoading && uiState.error == null) {
+                Button(
+                    onClick = { viewModel.regenerateRecommendation() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("✨ Generar recomendaciones de outfit")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "La IA analizará tus productos y sugerirá combinaciones. Disponible con límite de uso.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
             // Estado de carga
             when {
                 uiState.isLoading -> {
