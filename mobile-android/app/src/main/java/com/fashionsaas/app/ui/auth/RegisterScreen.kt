@@ -110,6 +110,7 @@ fun RegisterScreen(
                 value = firstName,
                 onValueChange = { firstName = it },
                 label = { Text("Nombre") },
+                placeholder = { Text("ej: Juan") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -118,6 +119,7 @@ fun RegisterScreen(
                 value = lastName,
                 onValueChange = { lastName = it },
                 label = { Text("Apellido") },
+                placeholder = { Text("ej: Perez") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -126,6 +128,8 @@ fun RegisterScreen(
                 value = username,
                 onValueChange = { username = it },
                 label = { Text("Usuario") },
+                placeholder = { Text("ej: juan123") },
+                supportingText = { Text("Sin espacios ni caracteres especiales") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -134,6 +138,7 @@ fun RegisterScreen(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email") },
+                placeholder = { Text("ej: juanp@email.com") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
@@ -143,6 +148,7 @@ fun RegisterScreen(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Contraseña") },
+                placeholder = { Text("Mínimo 8 caracteres") },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth(),
@@ -153,6 +159,7 @@ fun RegisterScreen(
                 value = password2,
                 onValueChange = { password2 = it },
                 label = { Text("Confirmar contraseña") },
+                placeholder = { Text("Repite tu contraseña") },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth(),

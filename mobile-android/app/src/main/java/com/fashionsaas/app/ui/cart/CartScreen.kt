@@ -242,6 +242,7 @@ fun CartScreen(
                         value = shippingAddress,
                         onValueChange = { shippingAddress = it },
                         label = { Text("Dirección") },
+                        placeholder = { Text("ej: Av. Ejército 123") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -251,6 +252,7 @@ fun CartScreen(
                         value = shippingCity,
                         onValueChange = { shippingCity = it },
                         label = { Text("Ciudad") },
+                        placeholder = { Text("ej: Arequipa") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -260,6 +262,7 @@ fun CartScreen(
                         value = shippingPhone,
                         onValueChange = { shippingPhone = it },
                         label = { Text("Teléfono") },
+                        placeholder = { Text("ej: 959123456") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
