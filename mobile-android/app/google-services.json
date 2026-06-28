@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "504027947640",
+    "project_id": "fashion-saas-61d59",
+    "storage_bucket": "fashion-saas-61d59.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:504027947640:android:7659f1bde9a0d6533b438d",
+        "android_client_info": {
+          "package_name": "com.fashionsaas.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkmyurDMm-KPjyHq29RnHN2WzWw4v-T_c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

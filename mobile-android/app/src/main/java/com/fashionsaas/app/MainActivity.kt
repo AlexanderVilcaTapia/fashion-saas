@@ -1,4 +1,4 @@
-package com.example.fashionsaas
+package com.fashionsaas.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
