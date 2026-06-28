@@ -43,7 +43,7 @@ class AiViewModel @Inject constructor(
      * Modelo generativo de Gemini configurado para recomendaciones de moda.
      */
     private val generativeModel = GenerativeModel(
-        modelName = "gemini-1.5-flash-latest",
+        modelName = "gemini-2.0-flash",
         apiKey = BuildConfig.GEMINI_API_KEY,
         generationConfig = generationConfig {
             temperature = 0.7f
