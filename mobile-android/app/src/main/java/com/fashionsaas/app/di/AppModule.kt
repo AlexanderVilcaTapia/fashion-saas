@@ -22,6 +22,11 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
+import androidx.datastore.preferences.core.stringPreferencesKey
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 /** Extensión para crear el DataStore de preferencias. */
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "fashion_prefs")
@@ -100,15 +105,19 @@ object AppModule {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
+        val tokenKey = stringPreferencesKey("access_token")
+
         return OkHttpClient.Builder()
             .addInterceptor(AuthInterceptor {
-                runCatching {
-                    kotlinx.coroutines.runBlocking {
-                        dataStore.data.first().let { prefs ->
-                            prefs[androidx.datastore.preferences.core.stringPreferencesKey("access_token")]
-                        }
+                var token: String? = null
+                val job = kotlinx.coroutines.GlobalScope.launch {
+                    dataStore.data.collect { prefs ->
+                        token = prefs[tokenKey]
                     }
-                }.getOrNull()
+                }
+                Thread.sleep(100)
+                job.cancel()
+                token
             })
             .addInterceptor(loggingInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)

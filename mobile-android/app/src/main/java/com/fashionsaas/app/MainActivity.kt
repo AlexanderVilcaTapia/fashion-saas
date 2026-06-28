@@ -7,17 +7,21 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
-import com.fashionsaas.app.ui.navigation.FashionNavGraph
+import androidx.multidex.MultiDex
+import android.content.Context
 import com.fashionsaas.app.ui.theme.FashionSaaSTheme
-import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * Activity principal de Fashion SaaS.
- * Punto de entrada de la aplicación, inicializa el tema y la navegación.
  */
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+        MultiDex.install(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +32,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    FashionNavGraph()
+                    Text("Fashion SaaS funcionando!")
                 }
             }
         }
