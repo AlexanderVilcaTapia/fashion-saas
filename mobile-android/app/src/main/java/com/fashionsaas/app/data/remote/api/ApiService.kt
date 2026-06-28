@@ -10,8 +10,10 @@ import com.fashionsaas.app.data.remote.dto.RegisterRequestDto
 import com.fashionsaas.app.data.remote.dto.RegisterResponseDto
 import com.fashionsaas.app.data.remote.dto.StoreDto
 import com.fashionsaas.app.data.remote.dto.UserDto
+import com.fashionsaas.app.data.remote.dto.CartItemAddDto
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -160,4 +162,22 @@ interface ApiService {
      */
     @GET("orders/")
     suspend fun getOrders(): Response<List<OrderDto>>
+
+    /**
+     * Agrega un item al carrito en Django.
+     *
+     * @param item datos del item a agregar
+     * @return respuesta del carrito actualizado
+     */
+    @POST("orders/cart/items/")
+    suspend fun addCartItem(@Body item: CartItemAddDto): Response<Any>
+
+    /**
+     * Vacía el carrito en Django.
+     *
+     * @param storeId identificador de la tienda
+     * @return respuesta de confirmación
+     */
+    @DELETE("orders/cart/")
+    suspend fun clearDjangoCart(@Query("store_id") storeId: Int): Response<Any>
 }

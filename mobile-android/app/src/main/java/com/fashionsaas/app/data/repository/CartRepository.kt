@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.fashionsaas.app.data.remote.dto.CartItemAddDto
+import kotlinx.coroutines.flow.first
 
 /**
  * Repositorio del carrito de compras.
@@ -137,7 +139,7 @@ class CartRepository @Inject constructor(
     }
 
     /**
-     * Crea una orden en la API Django con los datos de envío.
+     * Crea una orden sincronizando primero el carrito local con Django.
      *
      * @param storeId         identificador de la tienda
      * @param shippingAddress dirección de envío
@@ -152,6 +154,24 @@ class CartRepository @Inject constructor(
         shippingPhone: String
     ): Result<Order> {
         return try {
+            val localItems = cartDao.getAllCartItems().first()
+
+            // Primero vaciar el carrito de Django
+            apiService.clearDjangoCart(storeId)
+
+            // Sincronizar cada item local con Django
+            for (item in localItems) {
+                apiService.addCartItem(
+                    CartItemAddDto(
+                        storeId = item.storeId,
+                        productId = item.productId,
+                        sizeId = item.sizeId,
+                        quantity = item.quantity
+                    )
+                )
+            }
+
+            // Crear la orden
             val response = apiService.createOrder(
                 CreateOrderRequestDto(storeId, shippingAddress, shippingCity, shippingPhone)
             )
