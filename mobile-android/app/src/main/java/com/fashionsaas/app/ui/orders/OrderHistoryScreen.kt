@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.fashionsaas.app.data.remote.dto.OrderDto
 
 /**
  * Estado de la UI para el historial de órdenes.
@@ -76,7 +77,7 @@ class OrderHistoryViewModel @Inject constructor(
             try {
                 val response = apiService.getOrders()
                 if (response.isSuccessful) {
-                    val orders = response.body()?.map { dto ->
+                    val orders = response.body()?.results?.map { dto ->
                         Order(
                             id = dto.id,
                             buyerName = dto.buyerName,

@@ -3,6 +3,7 @@ package com.fashionsaas.app.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.fashionsaas.app.BuildConfig
@@ -11,22 +12,21 @@ import com.fashionsaas.app.data.local.dao.CartDao
 import com.fashionsaas.app.data.local.dao.ProductDao
 import com.fashionsaas.app.data.remote.api.ApiService
 import com.fashionsaas.app.data.remote.api.AuthInterceptor
+import com.fashionsaas.app.data.remote.api.TokenAuthenticator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
-import androidx.datastore.preferences.core.stringPreferencesKey
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 /** Extensión para crear el DataStore de preferencias. */
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "fashion_prefs")
@@ -41,7 +41,6 @@ object AppModule {
 
     /**
      * Provee la instancia singleton del DataStore de preferencias.
-     * Se usa para almacenar el token JWT y preferencias del usuario.
      *
      * @param context contexto de la aplicación
      * @return instancia del DataStore
@@ -93,14 +92,31 @@ object AppModule {
     }
 
     /**
-     * Provee el cliente OkHttp con interceptores de autenticación y logging.
+     * Provee el TokenAuthenticator para renovación automática de JWT.
      *
-     * @param dataStore DataStore para obtener el token JWT
+     * @param dataStore DataStore para leer y guardar tokens
+     * @return instancia de TokenAuthenticator
+     */
+    @Provides
+    @Singleton
+    fun provideTokenAuthenticator(dataStore: DataStore<Preferences>): TokenAuthenticator {
+        return TokenAuthenticator(dataStore)
+    }
+
+    /**
+     * Provee el cliente OkHttp con interceptores de autenticación,
+     * renovación automática de token y logging.
+     *
+     * @param dataStore          DataStore para obtener el token JWT
+     * @param tokenAuthenticator authenticator para renovar tokens expirados
      * @return instancia de OkHttpClient
      */
     @Provides
     @Singleton
-    fun provideOkHttpClient(dataStore: DataStore<Preferences>): OkHttpClient {
+    fun provideOkHttpClient(
+        dataStore: DataStore<Preferences>,
+        tokenAuthenticator: TokenAuthenticator
+    ): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -108,9 +124,10 @@ object AppModule {
         val tokenKey = stringPreferencesKey("access_token")
 
         return OkHttpClient.Builder()
+            .authenticator(tokenAuthenticator)
             .addInterceptor(AuthInterceptor {
                 var token: String? = null
-                val job = kotlinx.coroutines.GlobalScope.launch {
+                val job = GlobalScope.launch {
                     dataStore.data.collect { prefs ->
                         token = prefs[tokenKey]
                     }

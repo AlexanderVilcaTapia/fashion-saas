@@ -18,6 +18,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import com.fashionsaas.app.data.remote.dto.OrderListDto
 
 /**
  * Interfaz de Retrofit para consumir la API REST de Django.
@@ -158,10 +159,10 @@ interface ApiService {
     /**
      * Obtiene el historial de órdenes del usuario autenticado.
      *
-     * @return lista de órdenes del usuario
+     * @return lista paginada de órdenes del usuario
      */
     @GET("orders/")
-    suspend fun getOrders(): Response<List<OrderDto>>
+    suspend fun getOrders(): Response<OrderListDto>
 
     /**
      * Agrega un item al carrito en Django.
