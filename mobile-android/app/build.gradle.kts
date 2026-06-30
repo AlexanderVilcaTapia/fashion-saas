@@ -31,6 +31,7 @@ android {
         }
         buildConfigField("String", "DJANGO_BASE_URL", "\"${props.getProperty("DJANGO_BASE_URL", "")}\"")
         buildConfigField("String", "GEMINI_API_KEY", "\"${props.getProperty("GEMINI_API_KEY", "")}\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${props.getProperty("GOOGLE_WEB_CLIENT_ID", "")}\"")
         // Lee la Maps API key desde local.properties
         buildConfigField("String", "MAPS_API_KEY", "\"${props.getProperty("MAPS_API_KEY", "")}\"")
         manifestPlaceholders["MAPS_API_KEY"] = props.getProperty("MAPS_API_KEY", "")
@@ -130,4 +131,10 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation("androidx.multidex:multidex:2.0.1")
+
+    implementation("com.google.firebase:firebase-auth-ktx:23.0.0")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 }

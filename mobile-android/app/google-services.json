@@ -12,7 +12,20 @@
           "package_name": "com.fashionsaas.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "504027947640-vju2bihuetl14lecukq8kucpdihm1og8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fashionsaas.app",
+            "certificate_hash": "af0e1d7ece2c628e898829f3114a02c799cadefd"
+          }
+        },
+        {
+          "client_id": "504027947640-dsihf6tdmvvdeuag3stt4n86h3jhcm6l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCkmyurDMm-KPjyHq29RnHN2WzWw4v-T_c"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "504027947640-dsihf6tdmvvdeuag3stt4n86h3jhcm6l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -161,3 +161,12 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 SIMPLE_JWT['USER_AUTHENTICATION_RULE'] = 'rest_framework_simplejwt.authentication.default_user_authentication_rule'
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+import firebase_admin
+from firebase_admin import credentials
+import os
+
+FIREBASE_CRED_PATH = os.path.join(BASE_DIR, 'core', 'firebase-credentials.json')
+if os.path.exists(FIREBASE_CRED_PATH) and not firebase_admin._apps:
+    cred = credentials.Certificate(FIREBASE_CRED_PATH)
+    firebase_admin.initialize_app(cred)

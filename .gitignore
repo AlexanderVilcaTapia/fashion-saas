@@ -12,6 +12,7 @@ backend-django/venv/
 backend-django/env/
 backend-django/staticfiles/
 backend-django/media/
+backend-django/core/firebase-credentials.json
 
 # ===========================
 # SPRING BOOT
