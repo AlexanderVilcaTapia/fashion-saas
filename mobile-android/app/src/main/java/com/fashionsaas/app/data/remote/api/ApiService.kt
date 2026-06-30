@@ -11,6 +11,8 @@ import com.fashionsaas.app.data.remote.dto.RegisterResponseDto
 import com.fashionsaas.app.data.remote.dto.StoreDto
 import com.fashionsaas.app.data.remote.dto.UserDto
 import com.fashionsaas.app.data.remote.dto.CartItemAddDto
+import com.fashionsaas.app.data.remote.dto.GoogleLoginRequestDto
+import com.fashionsaas.app.data.remote.dto.GoogleLoginResponseDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -181,4 +183,13 @@ interface ApiService {
      */
     @DELETE("orders/cart/")
     suspend fun clearDjangoCart(@Query("store_id") storeId: Int): Response<Any>
+
+    /**
+     * Inicia sesión o registra un usuario usando un token de Firebase (Google Sign-In).
+     *
+     * @param request token de Firebase a verificar
+     * @return tokens JWT del sistema y datos del usuario
+     */
+    @POST("auth/google-login/")
+    suspend fun googleLogin(@Body request: GoogleLoginRequestDto): Response<GoogleLoginResponseDto>
 }

@@ -166,4 +166,31 @@ class AuthRepository @Inject constructor(
             prefs[REFRESH_TOKEN_KEY] = refreshToken
         }
     }
+
+    /**
+     * Autentica al usuario usando un token de Firebase obtenido de Google Sign-In.
+     * Envía el token a Django para verificarlo y obtener los JWT del sistema.
+     *
+     * @param firebaseToken token de ID de Firebase tras autenticarse con Google
+     * @return Result con el mensaje de éxito o error
+     */
+    suspend fun loginWithGoogle(firebaseToken: String): Result<String> {
+        return try {
+            val response = apiService.googleLogin(
+                com.fashionsaas.app.data.remote.dto.GoogleLoginRequestDto(firebaseToken)
+            )
+            if (response.isSuccessful) {
+                val data = response.body()!!
+                saveTokens(data.access, data.refresh)
+                dataStore.edit { prefs ->
+                    prefs[USER_EMAIL_KEY] = data.user.email
+                }
+                Result.success("Login con Google exitoso")
+            } else {
+                Result.failure(Exception("Error al iniciar sesión con Google."))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("Error de conexión. Verifica tu internet."))
+        }
+    }
 }

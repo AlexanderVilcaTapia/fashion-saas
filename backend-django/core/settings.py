@@ -164,9 +164,17 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 import firebase_admin
 from firebase_admin import credentials
+import json
 import os
 
-FIREBASE_CRED_PATH = os.path.join(BASE_DIR, 'core', 'firebase-credentials.json')
-if os.path.exists(FIREBASE_CRED_PATH) and not firebase_admin._apps:
-    cred = credentials.Certificate(FIREBASE_CRED_PATH)
-    firebase_admin.initialize_app(cred)
+if not firebase_admin._apps:
+    firebase_creds_json = os.environ.get('FIREBASE_CREDENTIALS_JSON')
+    if firebase_creds_json:
+        cred_dict = json.loads(firebase_creds_json)
+        cred = credentials.Certificate(cred_dict)
+        firebase_admin.initialize_app(cred)
+    else:
+        FIREBASE_CRED_PATH = os.path.join(BASE_DIR, 'core', 'firebase-credentials.json')
+        if os.path.exists(FIREBASE_CRED_PATH):
+            cred = credentials.Certificate(FIREBASE_CRED_PATH)
+            firebase_admin.initialize_app(cred)

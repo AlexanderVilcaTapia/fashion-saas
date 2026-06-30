@@ -28,7 +28,8 @@ data class AuthUiState(
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val cartRepository: com.fashionsaas.app.data.repository.CartRepository
+    private val cartRepository: com.fashionsaas.app.data.repository.CartRepository,
+    private val googleAuthRepository: com.fashionsaas.app.data.repository.GoogleAuthRepository
 ) : ViewModel() {
 
     /** Estado de la UI de autenticación. */
@@ -64,6 +65,35 @@ class AuthViewModel @Inject constructor(
                 onFailure = { e ->
                     _uiState.value = AuthUiState(error = e.message)
                 }
+            )
+        }
+    }
+
+    /**
+     * Inicia sesión con Google usando Credential Manager y Firebase.
+     * Obtiene el ID token de Firebase y lo envía a Django para autenticar.
+     *
+     * @param context contexto de la actividad que invoca el flujo
+     */
+    fun loginWithGoogle(context: android.content.Context) {
+        viewModelScope.launch {
+            _uiState.value = AuthUiState(isLoading = true)
+            val googleResult = googleAuthRepository.signInWithGoogle(context)
+            googleResult.fold(
+                onSuccess = { firebaseToken ->
+                    val loginResult = authRepository.loginWithGoogle(firebaseToken)
+                    loginResult.fold(
+                        onSuccess = {
+                            val userResult = authRepository.getCurrentUser()
+                            _uiState.value = AuthUiState(
+                                isSuccess = true,
+                                user = userResult.getOrNull()
+                            )
+                        },
+                        onFailure = { e -> _uiState.value = AuthUiState(error = e.message) }
+                    )
+                },
+                onFailure = { e -> _uiState.value = AuthUiState(error = e.message) }
             )
         }
     }

@@ -61,3 +61,20 @@ data class UserDto(
     @SerializedName("phone") val phone: String?,
     @SerializedName("avatar") val avatar: String?
 )
+
+/**
+ * DTO para la respuesta del login con Google.
+ */
+data class GoogleLoginResponseDto(
+    @SerializedName("access") val access: String,
+    @SerializedName("refresh") val refresh: String,
+    @SerializedName("user") val user: UserDto,
+    @SerializedName("created") val created: Boolean
+)
+
+/**
+ * DTO para el request del login con Google.
+ */
+data class GoogleLoginRequestDto(
+    @SerializedName("firebase_token") val firebaseToken: String
+)
