@@ -17,5 +17,7 @@ data class Store(
     val email: String?,
     val status: String,
     val totalProducts: Int,
-    val ownerName: String
+    val ownerName: String,
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )

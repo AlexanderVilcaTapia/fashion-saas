@@ -91,7 +91,9 @@ class StoreMapViewModel @Inject constructor(
                             email = dto.email,
                             status = dto.status,
                             totalProducts = dto.totalProducts,
-                            ownerName = dto.ownerName
+                            ownerName = dto.ownerName,
+                            latitude = dto.latitude?.toDoubleOrNull(),
+                            longitude = dto.longitude?.toDoubleOrNull()
                         )
                     } ?: emptyList()
                     _uiState.value = StoreMapUiState(stores = stores)
@@ -152,28 +154,19 @@ fun StoreMapScreen(
                     modifier = Modifier.fillMaxSize(),
                     cameraPositionState = cameraPositionState
                 ) {
-                    // Marcador principal de la ciudad
-                    Marker(
-                        state = MarkerState(position = arequipa),
-                        title = "Arequipa, Perú",
-                        snippet = "Ciudad principal"
-                    )
-
-                    // Marcadores de tiendas con posiciones de ejemplo
-                    uiState.stores.forEachIndexed { index, store ->
-                        val storePosition = LatLng(
-                            arequipa.latitude + (index * 0.005),
-                            arequipa.longitude + (index * 0.005)
-                        )
-                        Marker(
-                            state = MarkerState(position = storePosition),
-                            title = store.name,
-                            snippet = store.address ?: store.city ?: "Ver tienda",
-                            onClick = {
-                                onStoreClick(store.slug)
-                                true
-                            }
-                        )
+                    uiState.stores.forEach { store ->
+                        if (store.latitude != null && store.longitude != null) {
+                            val storePosition = LatLng(store.latitude, store.longitude)
+                            Marker(
+                                state = MarkerState(position = storePosition),
+                                title = store.name,
+                                snippet = store.address ?: store.city ?: "Ver tienda",
+                                onClick = {
+                                    onStoreClick(store.slug)
+                                    true
+                                }
+                            )
+                        }
                     }
                 }
 

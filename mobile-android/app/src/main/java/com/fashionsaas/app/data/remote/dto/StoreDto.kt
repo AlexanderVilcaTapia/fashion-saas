@@ -18,5 +18,7 @@ data class StoreDto(
     @SerializedName("email") val email: String?,
     @SerializedName("status") val status: String,
     @SerializedName("total_products") val totalProducts: Int,
-    @SerializedName("owner_name") val ownerName: String
+    @SerializedName("owner_name") val ownerName: String,
+    @SerializedName("latitude") val latitude: String?,
+    @SerializedName("longitude") val longitude: String?
 )
