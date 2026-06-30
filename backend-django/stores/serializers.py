@@ -18,13 +18,13 @@ class StoreSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'slug', 'description', 'logo', 'banner',
             'address', 'city', 'phone', 'email', 'status',
-            'total_products', 'owner_name', 'schedules', 'created_at'
+            'total_products', 'owner_name', 'schedules', 'created_at',
+            'latitude', 'longitude'
         )
         read_only_fields = ('id', 'slug', 'status', 'created_at')
 
     def get_owner_name(self, obj):
         return obj.owner.full_name
-
 
 class StoreCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -50,7 +50,7 @@ class StoreCreateSerializer(serializers.ModelSerializer):
 class StoreUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Store
-        fields = ('name', 'description', 'logo', 'banner', 'address', 'city', 'phone', 'email')
+        fields = ('name', 'description', 'logo', 'banner', 'address', 'city', 'phone', 'email','latitude','longitude')
 
 
 class StoreDashboardSerializer(serializers.ModelSerializer):
