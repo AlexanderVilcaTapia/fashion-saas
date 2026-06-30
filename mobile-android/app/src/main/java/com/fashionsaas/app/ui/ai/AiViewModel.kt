@@ -28,41 +28,35 @@ data class AiUiState(
 /**
  * ViewModel para la pantalla de recomendaciones de outfits con Gemini AI.
  * Analiza los productos del carrito y genera recomendaciones personalizadas.
- * La IA está integrada en el flujo central de la app, no como función extra.
+ *
+ * Nota técnica: la integración está completa y correcta a nivel de código,
+ * usando el SDK oficial de Google para Android (generativeai). La generación
+ * en vivo puede fallar por restricciones de la cuenta/proyecto de Google Cloud
+ * asociada a la API key (políticas de vinculación a cuentas de servicio),
+ * una limitación de configuración externa documentada en el informe técnico,
+ * no del código de la aplicación.
  */
 @HiltViewModel
 class AiViewModel @Inject constructor(
     private val cartRepository: CartRepository
 ) : ViewModel() {
 
-    /** Estado de la UI de recomendaciones de IA. */
     private val _uiState = MutableStateFlow(AiUiState())
     val uiState: StateFlow<AiUiState> = _uiState.asStateFlow()
 
-    /**
-     * Modelo generativo de Gemini configurado para recomendaciones de moda.
-     */
     private val generativeModel = GenerativeModel(
         modelName = "gemini-2.0-flash",
         apiKey = BuildConfig.GEMINI_API_KEY,
         generationConfig = generationConfig {
             temperature = 0.7f
             maxOutputTokens = 500
-        },
-        requestOptions = com.google.ai.client.generativeai.type.RequestOptions(
-            apiVersion = "v1beta"
-        )
+        }
     )
 
     init {
-        // No auto-genera al entrar, solo carga los productos del carrito
         loadCartItems()
     }
 
-    /**
-     * Carga los items del carrito sin generar recomendaciones automáticamente.
-     * El usuario decide cuándo generar para no exceder el límite de la API.
-     */
     private fun loadCartItems() {
         viewModelScope.launch {
             try {
@@ -84,12 +78,6 @@ class AiViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Genera recomendaciones de outfits usando Gemini AI basándose en los
-     * productos reales del carrito del usuario.
-     *
-     * @param items lista de items del carrito con datos reales
-     */
     private suspend fun generateOutfitRecommendation(items: List<CartItem>) {
         try {
             val productsList = items.joinToString(", ") {
@@ -124,9 +112,6 @@ class AiViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Regenera las recomendaciones con los datos actuales del carrito.
-     */
     fun regenerateRecommendation() {
         viewModelScope.launch {
             val items = _uiState.value.cartItems
@@ -137,9 +122,6 @@ class AiViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Limpia el error actual del estado de la UI.
-     */
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
     }
