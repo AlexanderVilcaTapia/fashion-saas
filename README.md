@@ -115,7 +115,17 @@ cd mobile-android
 
 ## Capturas de la App
 
-*Próximamente*
+| Pantalla | Captura |
+|----------|---------|
+| Inicio con tiendas destacadas | ![Home](docs/screenshots/01-home.jpg) |
+| Catálogo de tienda | ![Catálogo](docs/screenshots/02-catalogo.jpg) |
+| Detalle de producto | ![Detalle](docs/screenshots/03-detalle-producto.jpg) |
+| Carrito de compras | ![Carrito](docs/screenshots/04-carrito.jpg) |
+| Recomendaciones con IA | ![IA](docs/screenshots/05-ia-recomendaciones.jpg) |
+| Mapa de tiendas | ![Mapa](docs/screenshots/06-mapa.jpg) |
+| Historial de órdenes | ![Órdenes](docs/screenshots/07-ordenes.jpg) |
+| Login con Google | ![Login](docs/screenshots/08-login-google.jpg) |
+| Widget en pantalla de inicio | ![Widget](docs/screenshots/09-widget.jpg) |
 
 ## Video Demo
 

@@ -68,7 +68,7 @@ class OrderItem(models.Model):
 
 
 class Cart(models.Model):
-    buyer = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cart')
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='carts')
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='carts')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -76,9 +76,10 @@ class Cart(models.Model):
     class Meta:
         verbose_name = 'Carrito'
         verbose_name_plural = 'Carritos'
+        unique_together = ('buyer', 'store')
 
     def __str__(self):
-        return f'Carrito de {self.buyer.email}'
+        return f'Carrito de {self.buyer.email} en {self.store.name}'
 
     @property
     def total(self):
