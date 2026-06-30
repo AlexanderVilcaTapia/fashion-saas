@@ -6,6 +6,19 @@ import com.fashionsaas.app.domain.model.Store
 import javax.inject.Inject
 import javax.inject.Singleton
 
+private const val MEDIA_BASE_URL = "https://fashion-saas-production.up.railway.app"
+
+/**
+ * Convierte una ruta de imagen relativa en una URL absoluta completa.
+ *
+ * @param path ruta de la imagen devuelta por la API
+ * @return URL absoluta completa de la imagen
+ */
+private fun resolveImageUrl(path: String?): String? {
+    if (path.isNullOrBlank()) return null
+    return if (path.startsWith("http")) path else "$MEDIA_BASE_URL$path"
+}
+
 /**
  * Repositorio de tiendas.
  * Consume la API Django para obtener tiendas destacadas y búsqueda.
@@ -15,11 +28,6 @@ class StoreRepository @Inject constructor(
     private val apiService: ApiService
 ) {
 
-    /**
-     * Obtiene las tiendas destacadas para la pantalla principal.
-     *
-     * @return Result con la lista de tiendas destacadas
-     */
     suspend fun getFeaturedStores(): Result<List<Store>> {
         return try {
             val response = apiService.getFeaturedStores()
@@ -34,13 +42,6 @@ class StoreRepository @Inject constructor(
         }
     }
 
-    /**
-     * Obtiene la lista de tiendas activas con filtros opcionales.
-     *
-     * @param search texto de búsqueda opcional
-     * @param city   filtro por ciudad opcional
-     * @return Result con la lista de tiendas
-     */
     suspend fun getStores(
         search: String? = null,
         city: String? = null
@@ -58,12 +59,6 @@ class StoreRepository @Inject constructor(
         }
     }
 
-    /**
-     * Obtiene el detalle de una tienda por su slug.
-     *
-     * @param slug identificador único de la tienda
-     * @return Result con los datos de la tienda
-     */
     suspend fun getStoreBySlug(slug: String): Result<Store> {
         return try {
             val response = apiService.getStoreBySlug(slug)
@@ -81,19 +76,22 @@ class StoreRepository @Inject constructor(
 
 /**
  * Convierte un StoreDto de la API a un modelo de dominio Store.
+ * Resuelve las URLs de logo y banner a rutas absolutas.
  */
 fun StoreDto.toDomain(): Store = Store(
     id = id,
     name = name,
     slug = slug,
     description = description,
-    logoUrl = logo,
-    bannerUrl = banner,
+    logoUrl = resolveImageUrl(logo),
+    bannerUrl = resolveImageUrl(banner),
     address = address,
     city = city,
     phone = phone,
     email = email,
     status = status,
     totalProducts = totalProducts,
-    ownerName = ownerName
+    ownerName = ownerName,
+    latitude = latitude?.toDoubleOrNull(),
+    longitude = longitude?.toDoubleOrNull()
 )
