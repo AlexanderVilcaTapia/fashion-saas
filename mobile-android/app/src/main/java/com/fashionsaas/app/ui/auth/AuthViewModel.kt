@@ -27,7 +27,8 @@ data class AuthUiState(
  */
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val cartRepository: com.fashionsaas.app.data.repository.CartRepository
 ) : ViewModel() {
 
     /** Estado de la UI de autenticación. */
@@ -107,11 +108,12 @@ class AuthViewModel @Inject constructor(
     }
 
     /**
-     * Cierra la sesión del usuario actual.
+     * Cierra la sesión del usuario actual y limpia el carrito local.
      */
     fun logout() {
         viewModelScope.launch {
             authRepository.logout()
+            cartRepository.clearLocalCart()
             _uiState.value = AuthUiState()
         }
     }

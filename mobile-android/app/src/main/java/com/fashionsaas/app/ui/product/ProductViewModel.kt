@@ -146,7 +146,8 @@ class ProductViewModel @Inject constructor(
                 sizeId = size.id,
                 sizeName = size.size,
                 storeId = product.storeId,
-                storeName = product.storeName
+                storeName = product.storeName,
+                quantity = state.quantity
             )
             _detailState.value = state.copy(isAddedToCart = true, error = null)
         }

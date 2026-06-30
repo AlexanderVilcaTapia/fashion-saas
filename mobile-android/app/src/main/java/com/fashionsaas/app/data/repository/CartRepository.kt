@@ -48,17 +48,18 @@ class CartRepository @Inject constructor(
     }
 
     /**
-     * Agrega un producto al carrito local.
-     * Si el producto ya existe con la misma talla, incrementa la cantidad.
+     * Agrega un producto al carrito local, respetando la cantidad seleccionada.
+     * Si ya existe el mismo producto y talla, suma la cantidad nueva a la existente.
      *
      * @param productId    identificador del producto
      * @param productName  nombre del producto
-     * @param productPrice precio del producto
+     * @param productPrice precio final del producto
      * @param imageUrl     URL de la imagen del producto
      * @param sizeId       identificador de la talla
      * @param sizeName     nombre de la talla
      * @param storeId      identificador de la tienda
      * @param storeName    nombre de la tienda
+     * @param quantity     cantidad a agregar
      */
     suspend fun addToCart(
         productId: Int,
@@ -68,11 +69,12 @@ class CartRepository @Inject constructor(
         sizeId: Int,
         sizeName: String,
         storeId: Int,
-        storeName: String
+        storeName: String,
+        quantity: Int = 1
     ) {
         val existing = cartDao.getCartItemByProductAndSize(productId, sizeId)
         if (existing != null) {
-            cartDao.updateCartItem(existing.copy(quantity = existing.quantity + 1))
+            cartDao.updateCartItem(existing.copy(quantity = existing.quantity + quantity))
         } else {
             cartDao.insertCartItem(
                 CartItemEntity(
@@ -82,7 +84,7 @@ class CartRepository @Inject constructor(
                     productImageUrl = imageUrl,
                     sizeId = sizeId,
                     sizeName = sizeName,
-                    quantity = 1,
+                    quantity = quantity,
                     storeId = storeId,
                     storeName = storeName
                 )
@@ -211,6 +213,14 @@ class CartRepository @Inject constructor(
         } catch (e: Exception) {
             Result.failure(Exception("Error de conexión: ${e.message}"))
         }
+    }
+
+    /**
+     * Limpia el carrito local sin afectar el carrito en Django.
+     * Se usa al cerrar sesión para no mezclar carritos entre usuarios.
+     */
+    suspend fun clearLocalCart() {
+        cartDao.clearCart()
     }
 }
 
