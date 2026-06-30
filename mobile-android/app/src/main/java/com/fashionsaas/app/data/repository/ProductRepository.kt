@@ -127,9 +127,20 @@ class ProductRepository @Inject constructor(
     }
 }
 
+private const val MEDIA_BASE_URL = "https://fashion-saas-production.up.railway.app"
+
 /**
- * Convierte un ProductDto de la API a un modelo de dominio Product.
+ * Convierte una ruta de imagen relativa en una URL absoluta completa.
+ * Si la ruta ya es absoluta (empieza con http), la retorna sin cambios.
+ *
+ * @param path ruta de la imagen devuelta por la API
+ * @return URL absoluta completa de la imagen
  */
+private fun resolveImageUrl(path: String?): String? {
+    if (path.isNullOrBlank()) return null
+    return if (path.startsWith("http")) path else "$MEDIA_BASE_URL$path"
+}
+
 fun ProductDto.toDomain(): Product = Product(
     id = id,
     storeId = storeId,
@@ -141,12 +152,12 @@ fun ProductDto.toDomain(): Product = Product(
     discountPrice = discountPrice?.toDoubleOrNull(),
     finalPrice = finalPrice.toDoubleOrNull() ?: 0.0,
     hasDiscount = hasDiscount,
-    imageUrl = images.firstOrNull { it.isPrimary }?.image ?: images.firstOrNull()?.image,
+    imageUrl = resolveImageUrl(images.firstOrNull { it.isPrimary }?.image ?: images.firstOrNull()?.image),
     categoryName = categoryName,
     status = status,
     isFeatured = isFeatured,
     sizes = sizes.map { ProductSize(it.id, it.size, it.stock) },
-    images = images.map { ProductImage(it.id, it.image, it.isPrimary) }
+    images = images.map { ProductImage(it.id, resolveImageUrl(it.image) ?: it.image, it.isPrimary) }
 )
 
 /**
