@@ -31,13 +31,14 @@ class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     category_name = serializers.SerializerMethodField()
     store_name = serializers.SerializerMethodField()
+    store_slug = serializers.SerializerMethodField()
     final_price = serializers.ReadOnlyField()
     has_discount = serializers.ReadOnlyField()
 
     class Meta:
         model = Product
         fields = (
-            'id', 'store', 'store_name', 'category', 'category_name',
+            'id', 'store', 'store_name', 'store_slug', 'category', 'category_name',
             'name', 'slug', 'description', 'price', 'discount_price',
             'final_price', 'has_discount', 'status', 'is_featured',
             'sizes', 'images', 'created_at', 'updated_at'
@@ -49,6 +50,9 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_store_name(self, obj):
         return obj.store.name
+
+    def get_store_slug(self, obj):
+        return obj.store.slug
 
 
 class ProductCreateSerializer(serializers.ModelSerializer):
