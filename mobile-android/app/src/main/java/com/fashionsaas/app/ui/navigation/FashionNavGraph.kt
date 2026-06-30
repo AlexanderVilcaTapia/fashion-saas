@@ -65,6 +65,12 @@ fun FashionNavGraph() {
                 onMapsClick = { navController.navigate(Routes.MAPS) },
                 onAiClick = { navController.navigate(Routes.AI_RECOMMENDATION) },
                 onOrdersClick = { navController.navigate(Routes.ORDERS) },
+                onLogoutClick = {
+                    authViewModel.logout()
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.HOME) { inclusive = true }
+                    }
+                },
                 isAuthenticated = isAuthenticated,
                 cartItemCount = cartItemCount
             )
