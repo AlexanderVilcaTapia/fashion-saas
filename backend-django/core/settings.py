@@ -167,7 +167,7 @@ STORAGES = {
 # SimpleJWT usa email como campo de login
 SIMPLE_JWT['USER_AUTHENTICATION_RULE'] = 'rest_framework_simplejwt.authentication.default_user_authentication_rule'
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 import firebase_admin
 from firebase_admin import credentials
