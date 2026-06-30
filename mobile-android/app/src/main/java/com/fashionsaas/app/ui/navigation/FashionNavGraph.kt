@@ -68,7 +68,8 @@ fun FashionNavGraph() {
                 onLogoutClick = {
                     authViewModel.logout()
                     navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.HOME) { inclusive = true }
+                        popUpTo(navController.graph.id) { inclusive = true }
+                        launchSingleTop = true
                     }
                 },
                 isAuthenticated = isAuthenticated,
@@ -131,7 +132,11 @@ fun FashionNavGraph() {
         composable(Routes.CART) {
             CartScreen(
                 onBackClick = { navController.popBackStack() },
-                onCheckoutSuccess = { navController.navigate(Routes.ORDERS) },
+                onCheckoutSuccess = {
+                    navController.navigate(Routes.ORDERS) {
+                        popUpTo(Routes.HOME)
+                    }
+                },
                 onLoginRequired = { navController.navigate(Routes.LOGIN) },
                 onAiClick = { navController.navigate(Routes.AI_RECOMMENDATION) }
             )
