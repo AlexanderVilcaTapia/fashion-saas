@@ -129,4 +129,5 @@ cd mobile-android
 
 ## Video Demo
 
-*Próximamente*
+Link de video en Google Drive: https://drive.google.com/file/d/12eRW4bV4FXJBvFF_8SLT40lpvrjkeE-I/view?usp=sharing
+Link de video en Youtube: https://youtu.be/CTNdJTcBHm0
