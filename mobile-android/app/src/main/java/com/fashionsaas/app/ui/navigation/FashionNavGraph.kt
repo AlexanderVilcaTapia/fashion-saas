@@ -53,6 +53,9 @@ fun FashionNavGraph() {
         startDestination = Routes.HOME
     ) {
         composable(Routes.HOME) {
+            val cartViewModel: com.fashionsaas.app.ui.cart.CartViewModel = hiltViewModel()
+            val cartItemCount by cartViewModel.cartItemCount.collectAsState(initial = 0)
+
             HomeScreen(
                 onStoreClick = { storeSlug ->
                     navController.navigate(Routes.storeCatalog(storeSlug))
@@ -62,7 +65,8 @@ fun FashionNavGraph() {
                 onMapsClick = { navController.navigate(Routes.MAPS) },
                 onAiClick = { navController.navigate(Routes.AI_RECOMMENDATION) },
                 onOrdersClick = { navController.navigate(Routes.ORDERS) },
-                isAuthenticated = isAuthenticated
+                isAuthenticated = isAuthenticated,
+                cartItemCount = cartItemCount
             )
         }
 

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * Estado de la UI para la pantalla del carrito.
@@ -141,4 +142,7 @@ class CartViewModel @Inject constructor(
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
     }
+    /** Conteo total de items en el carrito, expuesto como Flow reactivo. */
+    val cartItemCount: StateFlow<Int> = cartRepository.getCartItemCount()
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), 0)
 }

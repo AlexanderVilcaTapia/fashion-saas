@@ -47,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.fashionsaas.app.domain.model.Store
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 
 /**
  * Pantalla principal de Fashion SaaS.
@@ -70,7 +72,8 @@ fun HomeScreen(
     onAiClick: () -> Unit,
     onOrdersClick: () -> Unit,
     isAuthenticated: Boolean,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    cartItemCount: Int = 0
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -91,7 +94,15 @@ fun HomeScreen(
                 ),
                 actions = {
                     IconButton(onClick = onCartClick) {
-                        Icon(Icons.Default.ShoppingCart, contentDescription = "Carrito")
+                        BadgedBox(
+                            badge = {
+                                if (cartItemCount > 0) {
+                                    Badge { Text(cartItemCount.toString()) }
+                                }
+                            }
+                        ) {
+                            Icon(Icons.Default.ShoppingCart, contentDescription = "Carrito")
+                        }
                     }
                     IconButton(onClick = if (isAuthenticated) onOrdersClick else onLoginClick) {
                         Icon(Icons.Default.Person, contentDescription = "Perfil")

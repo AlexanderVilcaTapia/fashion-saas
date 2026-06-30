@@ -37,12 +37,14 @@ class CartRepository @Inject constructor(
     }
 
     /**
-     * Obtiene el número de items en el carrito como un Flow reactivo.
+     * Obtiene el número total de items en el carrito como Flow reactivo.
      *
-     * @return Flow con el conteo de items
+     * @return Flow con la cantidad total de productos en el carrito
      */
     fun getCartItemCount(): Flow<Int> {
-        return cartDao.getCartItemCount()
+        return cartDao.getAllCartItems().map { items ->
+            items.sumOf { it.quantity }
+        }
     }
 
     /**

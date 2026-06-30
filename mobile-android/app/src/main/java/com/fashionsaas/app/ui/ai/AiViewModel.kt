@@ -48,7 +48,10 @@ class AiViewModel @Inject constructor(
         generationConfig = generationConfig {
             temperature = 0.7f
             maxOutputTokens = 500
-        }
+        },
+        requestOptions = com.google.ai.client.generativeai.type.RequestOptions(
+            apiVersion = "v1beta"
+        )
     )
 
     init {
