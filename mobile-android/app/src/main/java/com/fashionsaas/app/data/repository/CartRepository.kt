@@ -21,7 +21,8 @@ import kotlinx.coroutines.flow.first
 @Singleton
 class CartRepository @Inject constructor(
     private val cartDao: CartDao,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context
 ) {
 
     /**
@@ -50,16 +51,6 @@ class CartRepository @Inject constructor(
     /**
      * Agrega un producto al carrito local, respetando la cantidad seleccionada.
      * Si ya existe el mismo producto y talla, suma la cantidad nueva a la existente.
-     *
-     * @param productId    identificador del producto
-     * @param productName  nombre del producto
-     * @param productPrice precio final del producto
-     * @param imageUrl     URL de la imagen del producto
-     * @param sizeId       identificador de la talla
-     * @param sizeName     nombre de la talla
-     * @param storeId      identificador de la tienda
-     * @param storeName    nombre de la tienda
-     * @param quantity     cantidad a agregar
      */
     suspend fun addToCart(
         productId: Int,
@@ -90,6 +81,7 @@ class CartRepository @Inject constructor(
                 )
             )
         }
+        updateWidget()
     }
 
     /**
@@ -111,6 +103,7 @@ class CartRepository @Inject constructor(
             storeName = cartItem.storeName
         )
         cartDao.updateCartItem(entity)
+        updateWidget()
     }
 
     /**
@@ -133,6 +126,7 @@ class CartRepository @Inject constructor(
                 storeName = cartItem.storeName
             )
         )
+        updateWidget()
     }
 
     /**
@@ -140,16 +134,11 @@ class CartRepository @Inject constructor(
      */
     suspend fun clearCart() {
         cartDao.clearCart()
+        updateWidget()
     }
 
     /**
      * Crea una orden sincronizando primero el carrito local con Django.
-     *
-     * @param storeId         identificador de la tienda
-     * @param shippingAddress dirección de envío
-     * @param shippingCity    ciudad de envío
-     * @param shippingPhone   teléfono de contacto
-     * @return Result con los datos de la orden creada
      */
     suspend fun createOrder(
         storeId: Int,
@@ -206,6 +195,7 @@ class CartRepository @Inject constructor(
                     }
                 )
                 cartDao.clearCart()
+                updateWidget() // Se actualiza aquí dado que clearCart() fue llamado internamente
                 Result.success(order)
             } else {
                 Result.failure(Exception("Error al crear la orden: ${response.message()}"))
@@ -217,25 +207,40 @@ class CartRepository @Inject constructor(
 
     /**
      * Limpia el carrito local sin afectar el carrito en Django.
-     * Se usa al cerrar sesión para no mezclar carritos entre usuarios.
      */
     suspend fun clearLocalCart() {
         cartDao.clearCart()
+        updateWidget()
+    }
+
+    /**
+     * Convierte una entidad de Room CartItemEntity a un modelo de dominio CartItem.
+     */
+    fun CartItemEntity.toDomain(): CartItem = CartItem(
+        id = id,
+        productId = productId,
+        productName = productName,
+        productPrice = productPrice,
+        productImageUrl = productImageUrl,
+        sizeId = sizeId,
+        sizeName = sizeName,
+        quantity = quantity,
+        storeId = storeId,
+        storeName = storeName
+    )
+
+    /**
+     * Solicita la actualización del widget del carrito en la pantalla de inicio.
+     */
+    private suspend fun updateWidget() {
+        try {
+            val manager = androidx.glance.appwidget.GlanceAppWidgetManager(context)
+            val glanceIds = manager.getGlanceIds(com.fashionsaas.app.ui.widget.CartWidget::class.java)
+            glanceIds.forEach { id ->
+                com.fashionsaas.app.ui.widget.CartWidget().update(context, id)
+            }
+        } catch (e: Exception) {
+            // El widget puede no estar agregado a la pantalla, se ignora el error
+        }
     }
 }
-
-/**
- * Convierte una entidad de Room CartItemEntity a un modelo de dominio CartItem.
- */
-fun CartItemEntity.toDomain(): CartItem = CartItem(
-    id = id,
-    productId = productId,
-    productName = productName,
-    productPrice = productPrice,
-    productImageUrl = productImageUrl,
-    sizeId = sizeId,
-    sizeName = sizeName,
-    quantity = quantity,
-    storeId = storeId,
-    storeName = storeName
-)
